@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ResQHer Prototype: A Safety Layer for Campus</title>
+<style>
+/* =========================================================
+   ResQHer prototype: plain HTML + CSS + JavaScript
+   No libraries, no internet needed. Open index.html to run.
+   ========================================================= */
+:root{
+  --bg:#F8F6FF; --ink:#14123A; --muted:#5E5A7C; --purple:#6D4AE0; --purple-soft:#EEE9FF;
+  --coral:#E0364F; --green:#0E9F6E; --amber:#D99A00; --card:#FFFFFF; --line:#E3DDF8;
+  --shadow:0 6px 18px rgba(109,74,224,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+.brand i{width:6px;height:26px;background:var(--purple);border-radius:3px;display:block}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.controls{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{padding:9px 14px;border-radius:10px;font-weight:600;font-size:14px;background:var(--purple-soft);color:var(--purple)}
+.btn:hover{filter:brightness(.96)}
+.btn.primary{background:var(--purple);color:#fff}
+.btn.danger{background:var(--coral);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+select{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#fff}
+.notice{background:#FFF7E0;color:#6B4E00;font-size:13px;padding:8px 24px;border-bottom:1px solid #F3E2A9}
+.grid{display:grid;grid-template-columns:340px minmax(420px,1fr) 340px;gap:20px;padding:20px 24px;align-items:start}
+@media(max-width:1150px){.grid{grid-template-columns:340px 1fr}.side{grid-column:1/-1}}
+@media(max-width:780px){.grid{grid-template-columns:1fr;padding:14px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:10px}
+.cap{text-align:center;font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- phone ---------- */
+.phone{width:300px;height:610px;margin:0 auto;background:var(--ink);border-radius:40px;padding:10px;box-shadow:0 14px 34px rgba(60,40,160,.30);border:2px solid #4B3AA8}
+.screen{width:100%;height:100%;background:#0E0C2B;border-radius:30px;padding:20px 18px;color:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:80px;height:10px;border-radius:6px;background:#1E1A4D}
+.ph-top{display:flex;justify-content:space-between;font-size:12px;color:#B9B4E6;margin-top:6px}
+.ph-logo{text-align:center;font-weight:800;font-size:20px;margin-top:14px}
+.ph-q{text-align:center;font-size:16px;color:#E9E6FF;margin:10px 0 4px}
+.sos-wrap{--p:0;width:190px;height:190px;border-radius:50%;margin:14px auto 8px;display:grid;place-items:center;background:conic-gradient(#fff calc(var(--p)*1%), rgba(224,54,79,.25) 0)}
+.sos{width:166px;height:166px;border-radius:50%;background:var(--coral);color:#fff;font-weight:800;font-size:38px;letter-spacing:.04em;box-shadow:0 0 0 12px rgba(224,54,79,.18),0 0 0 26px rgba(224,54,79,.08);user-select:none;touch-action:none}
+.sos:active{transform:scale(.97)}
+.hint{text-align:center;font-size:12px;color:#B9B4E6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.chip{padding:6px 10px;border-radius:999px;border:1px solid #4B3AA8;background:transparent;color:#D8D3FF;font-size:12px}
+.chip.on{background:var(--purple);border-color:var(--purple);color:#fff}
+.ready{margin-top:auto;text-align:center;font-size:12px;color:#5FE0B0}
+.ph-status{margin-top:12px;display:flex;flex-direction:column;gap:9px}
+.step{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.dot{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:#2A2668;color:#B9B4E6}
+.step.done .dot{background:var(--green);color:#fff}
+.step.wait .dot{background:var(--amber);color:#14123A}
+.step.alert .dot{background:var(--coral);color:#fff}
+.step small{display:block;color:#B9B4E6;font-size:12px}
+.safe-btn{margin-top:auto;width:100%;padding:14px;border-radius:14px;font-weight:700;font-size:16px;background:var(--green);color:#fff}
+.call-btn{display:block;text-align:center;margin-top:8px;padding:11px;border-radius:12px;border:1px solid var(--coral);color:#FFB8C2;text-decoration:none;font-size:14px}
+.breath{width:120px;height:120px;border-radius:50%;margin:18px auto 6px;background:radial-gradient(circle,#8E73FF,#4B3AA8);animation:breath 8s ease-in-out infinite}
+@keyframes breath{0%,100%{transform:scale(.7);opacity:.7}50%{transform:scale(1.05);opacity:1}}
+@media(prefers-reduced-motion:reduce){.breath{animation:none}}
+
+/* ---------- engine ---------- */
+.engine{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lvl{flex:1 1 130px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
+.lvl b{display:block;font-size:13px}
+.lvl span{font-size:12px;color:var(--muted)}
+.lvl.done{border-color:var(--green);background:#EAF8F2}
+.lvl.active{border-color:var(--purple);background:var(--purple-soft)}
+.lvl.crit{border-color:var(--coral);background:#FDECEF}
+.arrow{color:var(--muted)}
+.bar{height:8px;border-radius:5px;background:var(--purple-soft);margin-top:12px;overflow:hidden}
+.bar>div{height:100%;width:0;background:var(--purple);transition:width .2s linear}
+.banner{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600}
+.banner.idle{background:var(--purple-soft);color:var(--purple)}
+.banner.alert{background:#FDECEF;color:var(--coral)}
+.banner.ok{background:#EAF8F2;color:var(--green)}
+
+/* ---------- map ---------- */
+.mapbox{padding:10px}
+.mapbox svg{width:100%;height:auto;display:block;border-radius:10px;background:#F3F0FF}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:8px 4px 2px;align-items:center}
+.legend label{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pulse{animation:pulse 1.4s ease-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pulse{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+
+/* ---------- guardian / security ---------- */
+.contacts{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.contact{display:flex;align-items:center;gap:10px;font-size:14px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--purple-soft);color:var(--purple);display:grid;place-items:center;font-weight:700}
+.tagpill{margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#EDEBF5;color:var(--muted)}
+.tagpill.n{background:#FFF3D1;color:#8A6200}.tagpill.a{background:#DFF6EC;color:var(--green)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.empty{color:var(--muted);font-size:14px}
+.log{max-height:230px;overflow:auto;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.log div{display:flex;gap:8px}
+.log time{flex:0 0 46px;color:var(--muted);font-variant-numeric:tabular-nums}
+.log .k-alert{color:var(--coral);font-weight:600}.log .k-ok{color:var(--green);font-weight:600}.log .k-warn{color:#8A6200;font-weight:600}
+.hist{font-size:13px;display:flex;flex-direction:column;gap:6px}
+.hist div{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--bg);border-radius:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:10}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.stats{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--purple-soft);font-size:13px;color:var(--ink)}
+.status p{font-size:13px;margin-bottom:8px;line-height:1.5}
+.pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:999px;margin-right:6px}
+.pill.b{background:#DFF6EC;color:var(--green)}.pill.s{background:#FFF3D1;color:#8A6200}.pill.p{background:#EDEBF5;color:var(--muted)}
+footer{padding:6px 24px 26px;font-size:12px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><i></i><div>ResQHer<small>A Safety Layer for Campus · working prototype</small></div></div>
+  <div class="controls">
+    <select id="workflow" aria-label="Workflow">
+      <option value="resqher">Workflow: ResQHer</option>
+      <option value="baseline">Workflow: SOS-only baseline</option>
+    </select>
+    <select id="mode" aria-label="Escalation timing">
+      <option value="demo">Demo timing (L2 at 15 s, L3 at 30 s)</option>
+      <option value="real">Real timing (L2 at 60 s, L3 at 120 s)</option>
+    </select>
+    <button class="btn" id="btnWalk">Start walk</button>
+    <button class="btn" id="btnTrigger">Trigger SOS</button>
+    <button class="btn primary" id="btnDemo">Run full demo</button>
+    <button class="btn ghost" id="btnReset">Reset</button>
+    <button class="btn ghost" id="btnCsv">Download log (CSV)</button>
+  </div>
+</header>
+<div class="notice">Prototype only. All notifications are simulated and no real alert is sent. In a real emergency, call <b>112</b>.</div>
+
+<main class="grid">
+  <!-- ================= STUDENT APP ================= -->
+  <section>
+    <div class="phone"><div class="screen" id="screen"></div></div>
+    <p class="cap">Student app</p>
+  </section>
+
+  <!-- ================= GUARDIAN VIEW ================= -->
+  <section>
+    <div class="card">
+      <h3>Escalation engine</h3>
+      <div class="engine" id="engine"></div>
+      <div class="bar"><div id="engBar"></div></div>
+      <div class="banner idle" id="engBanner">No active session. Hold the SOS button, or run the full demo.</div>
+    </div>
+
+    <div class="card mapbox">
+      <svg id="map" viewBox="0 0 600 380" role="img" aria-label="Campus map with live location"></svg>
+      <div class="legend">
+        <span>● Priya</span><span style="color:var(--green)">◆ Responder</span><span style="color:var(--coral)">◌ Past incidents</span>
+        <label><input type="checkbox" id="hot" checked> Show hotspots</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Guardian view · trusted circle</h3>
+      <div class="contacts" id="contacts"></div>
+      <div class="actions" id="guardActions"></div>
+    </div>
+  </section>
+
+  <!-- ================= SECURITY + LOG ================= -->
+  <section class="side">
+    <div class="card"><h3>Campus security control room</h3><div id="security"></div></div>
+    <div class="card"><h3>Incident timeline</h3><div class="log" id="log"></div></div>
+    <div class="card"><h3>Past incidents (this device)</h3><div class="hist" id="hist"></div><div class="stats" id="stats"></div></div>
+    <div class="card"><h3>Prototype status</h3>
+      <div class="status">
+        <p><span class="pill b">BUILT</span> Hold-to-trigger SOS, incident types, escalation timers (in the browser), acknowledgment, "I am safe", incident log, test statistics</p>
+        <p><span class="pill s">SIMULATED</span> Notifications, calls, the 112 prompt, the campus map, and all three views sharing one page</p>
+        <p><span class="pill p">PLANNED</span> Firebase backend with server-side timers, real location, push messages, sign-in</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>ResQHer · CodeStorm 2026 · Supports, and does not replace, official emergency services (112). No API keys or secrets are stored in this file.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   1. SETTINGS AND STATE
+   ========================================================= */
+const TH = { demo: { l2: 15, l3: 30 }, real: { l2: 60, l3: 120 } }; // seconds until escalation
+const WALK_SECONDS = 70;      // time for Priya to walk the whole route
+const RESPONDER_SPEED = 55;   // map units per second
+const HOLD_MS = 1500;         // how long to hold the SOS button
+
+// Campus route (map units, 600 x 380): Library -> Canteen -> Hostel
+const PATH = [[90,95],[90,180],[200,225],[300,215],[360,260],[445,315]];
+const START = { Ananya: [330, 95], 'Campus Security': [520, 92] };
+
+const S = {
+  phase: 'idle',      // idle | active | resolved
+  mode: 'demo',
+  type: 'Panic',
+  workflow: 'resqher',  // resqher | baseline (SOS-only comparison)
+  ackAt: null,
+  incident: null,     // {id, start, type, pos}
+  level: 0,           // 0 none, 1 contacts, 2 security, 3 call 112
+  acked: false, ackBy: null,
+  walking: false, walkT: 0,
+  user: { x: PATH[0][0], y: PATH[0][1] },
+  responder: null,    // {name, x, y, arrived}
+  contacts: [
+    { name: 'Ananya', rel: 'Friend (on campus)', status: 'idle' },
+    { name: 'Mom',    rel: 'Family',             status: 'idle' },
+    { name: 'Rohan',  rel: 'Friend',             status: 'idle' }
+  ],
+  security: 'idle',   // idle | alerted | dispatched
+  log: [],
+  history: [],
+  auto: false,
+  timers: []
+};
+try { S.history = JSON.parse(localStorage.getItem('resqher_history') || '[]'); } catch (e) { S.history = []; }
+
+/* =========================================================
+   2. SMALL HELPERS
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+const th = () => TH[S.mode];
+const pad = (n) => String(n).padStart(2, '0');
+const fmt = (s) => pad(Math.floor(Math.max(0, s) / 60)) + ':' + pad(Math.floor(Math.max(0, s) % 60));
+const elapsed = () => S.incident ? (Date.now() - S.incident.start) / 1000 : 0;
+function later(fn, ms) { const id = setTimeout(fn, ms); S.timers.push(id); return id; }
+function clearTimers() { S.timers.forEach(clearTimeout); S.timers = []; }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.id); toast.id = setTimeout(() => t.classList.remove('show'), 2200); }
+function addLog(text, kind) { S.log.push({ t: S.incident ? elapsed() : 0, text, kind: kind || '' }); }
+function clock() { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+
+function pathLength() { let L = 0; for (let i = 1; i < PATH.length; i++) L += Math.hypot(PATH[i][0]-PATH[i-1][0], PATH[i][1]-PATH[i-1][1]); return L; }
+const TOTAL = pathLength();
+function pointAt(t) {                      // t = 0..1 along the route
+  let d = Math.min(Math.max(t, 0), 1) * TOTAL;
+  for (let i = 1; i < PATH.length; i++) {
+    const seg = Math.hypot(PATH[i][0]-PATH[i-1][0], PATH[i][1]-PATH[i-1][1]);
+    if (d <= seg) { const k = d / seg; return { x: PATH[i-1][0] + (PATH[i][0]-PATH[i-1][0]) * k, y: PATH[i-1][1] + (PATH[i][1]-PATH[i-1][1]) * k }; }
+    d -= seg;
+  }
+  return { x: PATH[PATH.length-1][0], y: PATH[PATH.length-1][1] };
+}
+
+/* =========================================================
+   3. THE RESPONSE WORKFLOW (the core of ResQHer)
+      trigger -> notify contacts -> track acknowledgement
+      -> escalate if unanswered -> I'm safe -> log
+   ========================================================= */
+function trigger(type) {
+  if (S.phase !== 'idle') return;
+  S.type = type || S.type;
+  S.phase = 'active'; S.level = 1; S.acked = false; S.ackBy = null; S.ackAt = null; S.security = 'idle';
+  S.incident = { id: S.history.length + 1, start: Date.now(), type: S.type, pos: { x: S.user.x, y: S.user.y } };
+  S.log = [];
+  addLog('SOS triggered silently · ' + S.type, 'k-alert');
+  addLog('Level 1: location shared with 3 trusted contacts', '');
+  S.contacts.forEach((c) => c.status = 'notified');
+  later(() => { if (S.phase === 'active') { addLog('Alert delivered to all contacts', ''); refresh(); } }, 900);
+  refresh();
+}
+
+function acknowledge(who) {
+  if (S.phase !== 'active' || S.acked) return;
+  S.acked = true; S.ackBy = who; S.ackAt = elapsed();
+  if (who === 'Campus Security') { S.security = 'dispatched'; }
+  else { const c = S.contacts.find((x) => x.name === who); if (c) c.status = 'acknowledged'; }
+  addLog(who === 'Campus Security' ? 'Campus Security acknowledged and dispatched a guard' : who + ' acknowledged: "I am on my way"', 'k-ok');
+  addLog(S.workflow === 'baseline' ? 'Baseline mode: the student is not told that anyone responded' : 'Escalation paused: help is acknowledged', '');
+  if (who === 'Ananya' || who === 'Campus Security') {
+    const s = START[who];
+    S.responder = { name: who === 'Ananya' ? 'Ananya' : 'Guard', x: s[0], y: s[1], arrived: false };
+  }
+  refresh();
+}
+
+function escalate(level) {
+  if (S.phase !== 'active' || S.level >= level) return;
+  S.level = level;
+  if (level === 2) {
+    S.security = 'alerted';
+    addLog('No acknowledgement. Level 2: Campus Security alerted', 'k-warn');
+    if (S.auto) later(() => acknowledge('Campus Security'), 4000);
+  }
+  if (level === 3) addLog('Still unanswered. Level 3: prompt to call 112', 'k-alert');
+  refresh();
+}
+
+function resolve() {
+  if (S.phase !== 'active') return;
+  const dur = elapsed();
+  addLog('Student marked "I am safe". Incident closed', 'k-ok');
+  S.history.unshift({ id: S.incident.id, type: S.incident.type, dur, level: S.level, by: S.ackBy || 'none', ack: S.ackAt, wf: S.workflow, x: S.incident.pos.x, y: S.incident.pos.y, time: clock() });
+  S.history = S.history.slice(0, 20);
+  try { localStorage.setItem('resqher_history', JSON.stringify(S.history)); } catch (e) {}
+  S.phase = 'resolved'; S.walking = false; clearTimers();
+  refresh();
+}
+
+function resetAll() {
+  clearTimers();
+  Object.assign(S, { phase: 'idle', incident: null, level: 0, acked: false, ackBy: null, ackAt: null, walking: false, walkT: 0,
+    user: { x: PATH[0][0], y: PATH[0][1] }, responder: null, security: 'idle', log: [], auto: false });
+  S.contacts.forEach((c) => c.status = 'idle');
+  refresh();
+}
+
+function startWalk() { if (S.phase === 'resolved') resetAll(); S.walking = true; $('btnWalk').textContent = 'Walking…'; }
+
+function runDemo() {
+  resetAll(); S.auto = true; startWalk();
+  toast('Demo started: Priya walks, then feels followed');
+  later(() => trigger('Being followed'), 3500);
+}
+
+/* =========================================================
+   4. TICK: runs 5 times a second (movement + escalation timers)
+   ========================================================= */
+let last = performance.now();
+setInterval(() => {
+  const now = performance.now(); const dt = (now - last) / 1000; last = now;
+  if (S.walking) {
+    S.walkT += dt / WALK_SECONDS;
+    if (S.walkT >= 1) { S.walkT = 1; S.walking = false; $('btnWalk').textContent = 'Start walk'; }
+    const p = pointAt(S.walkT); S.user.x = p.x; S.user.y = p.y;
+  }
+  if (S.phase === 'active') {
+    const e = elapsed();
+    if (S.workflow === 'resqher' && !S.acked && S.level === 1 && e >= th().l2) escalate(2);
+    if (S.workflow === 'resqher' && !S.acked && S.level === 2 && e >= th().l3) escalate(3);
+    if (S.responder && !S.responder.arrived) {
+      const dx = S.user.x - S.responder.x, dy = S.user.y - S.responder.y, d = Math.hypot(dx, dy);
+      if (d < 16) {
+        S.responder.arrived = true; addLog(S.responder.name + ' reached Priya', 'k-ok'); refresh();
+        if (S.auto) later(resolve, 1800);
+      } else { S.responder.x += dx / d * RESPONDER_SPEED * dt; S.responder.y += dy / d * RESPONDER_SPEED * dt; }
+    }
+  }
+  updateDynamic();
+}, 200);
+
+/* =========================================================
+   5. RENDERING
+   ========================================================= */
+const ICON = { done: '✓', wait: '…', alert: '!' };
+function step(cls, title, sub) { return '<div class="step ' + cls + '"><div class="dot">' + (ICON[cls] || '•') + '</div><div>' + title + (sub ? '<small>' + sub + '</small>' : '') + '</div></div>'; }
+
+function renderPhone() {
+  const el = $('screen');
+  const head = '<div class="notch"></div><div class="ph-top"><span>9:30</span><span>●●● LTE</span></div><div class="ph-logo">ResQHer</div>';
+  if (S.phase === 'idle') {
+    el.innerHTML = head + '<div class="ph-q">Are you feeling unsafe?</div>' +
+      '<div class="sos-wrap" id="sosWrap"><button class="sos" id="sosBtn" aria-label="Hold for SOS">SOS</button></div>' +
+      '<div class="hint">Hold for 1.5 seconds</div>' +
+      '<div class="chips" id="types">' + ['Panic', 'Being followed', 'Unsafe vehicle', 'Harassment'].map((t) => '<button class="chip' + (t === S.type ? ' on' : '') + '" data-t="' + t + '">' + t + '</button>').join('') + '</div>' +
+      '<div class="ready">● Safety session ready</div>';
+    bindHold();
+    el.querySelectorAll('.chip').forEach((b) => b.onclick = () => { S.type = b.dataset.t; renderPhone(); });
+  } else if (S.phase === 'active') {
+    let s = step('done', 'Alert sent silently', S.type) + step('done', 'Trusted contacts notified', 'Live location shared');
+    if (S.workflow === 'baseline') s = step('done', 'Alert sent', S.type) + step('wait', 'No way to see if anyone received it', 'Baseline SOS-only mode: no acknowledgment, no escalation');
+    else if (S.acked) s += step('done', (S.ackBy === 'Campus Security' ? 'Campus Security' : S.ackBy) + ' is on the way', 'Help acknowledged');
+    else s += step('wait', 'Waiting for acknowledgement', 'Escalates in <span id="phCount">--</span>');
+    if (S.workflow === 'resqher' && S.level >= 2) s += step(S.acked ? 'done' : 'alert', 'Campus Security alerted', 'Level 2');
+    el.innerHTML = head + '<div class="ph-q" style="margin-top:14px">Help requested</div><div class="ph-status">' + s + '</div>' +
+      (S.level >= 3 ? '<a class="call-btn" href="tel:112">Call 112</a>' : '') +
+      '<button class="safe-btn" id="safeBtn">I am safe</button>';
+    $('safeBtn').onclick = resolve;
+  } else {
+    el.innerHTML = head + '<div class="ph-q" style="margin-top:14px">You are safe</div><div class="hint">Incident closed and logged</div>' +
+      '<div class="breath" aria-hidden="true"></div><div class="hint">Breathe in… and out…</div>' +
+      '<button class="safe-btn" id="newBtn" style="background:var(--purple)">Start new session</button>';
+    $('newBtn').onclick = resetAll;
+  }
+}
+
+function bindHold() {
+  const btn = $('sosBtn'), wrap = $('sosWrap'); let t0 = 0, raf = 0;
+  const frame = () => { const p = Math.min((performance.now() - t0) / HOLD_MS, 1); wrap.style.setProperty('--p', p * 100); if (p >= 1) { stop(); trigger(); } else raf = requestAnimationFrame(frame); };
+  const start = (e) => { e.preventDefault(); t0 = performance.now(); raf = requestAnimationFrame(frame); };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; if (wrap) wrap.style.setProperty('--p', 0); };
+  btn.addEventListener('pointerdown', start);
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
+  btn.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && !raf) start(e); });
+  btn.addEventListener('keyup', stop);
+}
+
+function renderEngine() {
+  if (S.workflow === 'baseline') { $('engine').innerHTML = '<div class="lvl"><b>SOS-only baseline</b><span>One alert. No acknowledgment tracking. No escalation.</span></div>'; return; }
+  const L = [
+    ['Level 1', 'Trusted contacts'], ['Level 2', 'Campus security'], ['Level 3', 'Call 112 prompt']
+  ];
+  $('engine').innerHTML = L.map((l, i) => {
+    let cls = '';
+    if (S.phase !== 'idle') { if (S.level > i + 1) cls = 'done'; else if (S.level === i + 1) cls = S.acked ? 'done' : (i === 2 ? 'crit' : 'active'); }
+    return (i ? '<span class="arrow">→</span>' : '') + '<div class="lvl ' + cls + '"><b>' + l[0] + '</b><span>' + l[1] + '</span></div>';
+  }).join('');
+}
+
+function renderGuardian() {
+  $('contacts').innerHTML = S.contacts.map((c) => {
+    const lab = c.status === 'idle' ? 'standby' : c.status === 'notified' ? 'notified' : 'acknowledged';
+    return '<div class="contact"><div class="avatar">' + c.name[0] + '</div><div><b>' + c.name + '</b><div style="font-size:12px;color:var(--muted)">' + c.rel + '</div></div><span class="tagpill ' + (c.status === 'notified' ? 'n' : c.status === 'acknowledged' ? 'a' : '') + '">' + lab + '</span></div>';
+  }).join('');
+  const g = $('guardActions');
+  if (S.phase === 'active') {
+    g.innerHTML = '<button class="btn green" id="gAck"' + (S.acked ? ' disabled' : '') + '>I am on my way (Ananya)</button>' +
+      '<button class="btn" id="gCall">Call Priya</button><button class="btn danger" id="gEsc"' + (S.level >= 2 || S.workflow === 'baseline' ? ' disabled' : '') + '>Escalate to security now</button>';
+    $('gAck').onclick = () => acknowledge('Ananya');
+    $('gCall').onclick = () => { addLog('Ananya called Priya (simulated)', ''); toast('Calling Priya… (simulated)'); refresh(); };
+    $('gEsc').onclick = () => escalate(2);
+  } else {
+    g.innerHTML = '<span class="empty">' + (S.phase === 'resolved' ? 'Incident closed. Everyone has been notified that Priya is safe.' : 'No active alerts. All quiet.') + '</span>';
+  }
+}
+
+function renderSecurity() {
+  const el = $('security');
+  if (S.phase === 'idle' || S.level < 2) { el.innerHTML = '<span class="empty">' + (S.phase === 'resolved' ? 'Incident closed.' : S.workflow === 'baseline' ? 'Baseline mode: nothing is ever escalated.' : 'Nothing escalated yet. Alerts appear here when contacts do not respond in time.') + '</span>'; return; }
+  const id = S.incident.id;
+  el.innerHTML = '<div class="banner ' + (S.acked ? 'ok' : 'alert') + '" style="margin:0 0 10px">Incident #' + id + ' · ' + S.incident.type + (S.level >= 3 ? ' · Level 3' : ' · Level 2') + '</div>' +
+    '<div style="font-size:14px;margin-bottom:10px">Student: <b>Priya</b><br>Location: live on the map<br>Status: <b>' + (S.security === 'dispatched' ? 'Guard dispatched' : S.acked ? 'Handled by ' + S.ackBy : 'Awaiting response') + '</b></div>' +
+    '<div class="actions"><button class="btn green" id="sDisp"' + (S.acked || S.phase !== 'active' ? ' disabled' : '') + '>Dispatch guard</button>' +
+    '<button class="btn danger" id="s112">' + (S.level >= 3 ? 'Call 112 (prompt)' : 'Call 112') + '</button></div>';
+  $('sDisp').onclick = () => acknowledge('Campus Security');
+  $('s112').onclick = () => { addLog('Control room prompted to call 112 (simulated)', 'k-warn'); toast('112 call is simulated in this prototype'); refresh(); };
+}
+
+function renderLog() {
+  const el = $('log');
+  if (!S.log.length) { el.innerHTML = '<span class="empty">Events appear here as the incident unfolds.</span>'; return; }
+  el.innerHTML = S.log.map((l) => '<div><time>+' + fmt(l.t) + '</time><span class="' + l.kind + '">' + l.text + '</span></div>').join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function median(a) { if (!a.length) return null; const b = a.slice().sort((x, y) => x - y), m = Math.floor(b.length / 2); return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+function renderStats() {
+  const r = S.history.filter((h) => h.wf !== 'baseline'), n = r.length;
+  if (!n) { $('stats').innerHTML = 'Test statistics appear after you resolve incidents (ResQHer workflow).'; return; }
+  const acks = r.filter((h) => h.ack !== null && h.ack !== undefined).map((h) => h.ack);
+  const esc = r.filter((h) => h.level >= 2).length;
+  $('stats').innerHTML = '<b>Your test results</b> (n = ' + n + ')<br>Acknowledged: ' + acks.length + ' of ' + n + (acks.length ? ' · median time to acknowledge ' + median(acks).toFixed(1) + ' s' : '') + '<br>Escalated beyond Level 1: ' + esc + ' of ' + n;
+}
+function downloadCsv() {
+  const rows = [['id', 'time', 'type', 'workflow', 'duration_s', 'max_level', 'acknowledged_by', 'ack_seconds']].concat(S.history.slice().reverse().map((h) => [h.id, h.time, h.type, h.wf || 'resqher', (h.dur || 0).toFixed(1), h.level, h.by, h.ack == null ? '' : h.ack.toFixed(1)]));
+  const blob = new Blob([rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'resqher-test-log.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function renderHist() {
+  const el = $('hist'); renderStats();
+  if (!S.history.length) { el.innerHTML = '<span class="empty">No incidents yet. Test incidents you resolve are saved on this device.</span>'; return; }
+  el.innerHTML = S.history.slice(0, 5).map((h) => '<div><span>#' + h.id + ' · ' + h.type + '</span><span>' + fmt(h.dur) + ' · L' + h.level + (h.wf === 'baseline' ? ' · baseline' : '') + ' · Safe</span></div>').join('');
+}
+
+/* ---------- map (drawn once, then moved) ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+function mk(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || $('map')).appendChild(e); return e; }
+let mapEls = {};
+function buildMap() {
+  const svg = $('map'); svg.innerHTML = '';
+  mk('ellipse', { cx: 300, cy: 130, rx: 70, ry: 38, fill: '#E3F6EC' });
+  mk('ellipse', { cx: 150, cy: 300, rx: 80, ry: 40, fill: '#E3F6EC' });
+  const road = (pts) => mk('polyline', { points: pts.map((p) => p.join(',')).join(' '), fill: 'none', stroke: '#E4DEFA', 'stroke-width': 16, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  road(PATH); road([[520, 92], [520, 150], [360, 200], [300, 215]]); road([[30, 320], [90, 180]]);
+  const bld = (x, y, w, h, label) => { mk('rect', { x, y, width: w, height: h, rx: 8, fill: '#fff', stroke: '#CFC6F5' }); const t = mk('text', { x: x + w / 2, y: y + h / 2 + 4, 'text-anchor': 'middle', 'font-size': 12, fill: '#5E5A7C' }); t.textContent = label; };
+  bld(40, 38, 100, 48, 'Library'); bld(255, 148, 90, 40, 'Canteen'); bld(440, 305, 120, 55, 'Hostel'); bld(10, 320, 56, 36, 'Gate'); bld(470, 40, 110, 50, 'Security office');
+  mapEls.hot = mk('g', {});
+  mapEls.trail = mk('polyline', { fill: 'none', stroke: '#6D4AE0', 'stroke-width': 3, 'stroke-dasharray': '2 6', 'stroke-linecap': 'round' });
+  mapEls.resp = mk('g', { visibility: 'hidden' });
+  mk('rect', { x: -8, y: -8, width: 16, height: 16, rx: 3, fill: '#0E9F6E', transform: 'rotate(45)' }, mapEls.resp);
+  mapEls.respLabel = mk('text', { y: -16, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, fill: '#0E9F6E' }, mapEls.resp);
+  mapEls.user = mk('g', {});
+  mapEls.pulse = mk('circle', { r: 14, fill: '#E0364F', opacity: 0, class: 'pulse' }, mapEls.user);
+  mapEls.dot = mk('circle', { r: 8, fill: '#6D4AE0', stroke: '#fff', 'stroke-width': 3 }, mapEls.user);
+  const lab = mk('text', { y: -14, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, fill: '#14123A' }, mapEls.user); lab.textContent = 'Priya';
+}
+function drawHotspots() {
+  mapEls.hot.innerHTML = '';
+  if (!$('hot').checked) return;
+  S.history.forEach((h) => mk('circle', { cx: h.x, cy: h.y, r: 26, fill: '#E0364F', opacity: 0.16 }, mapEls.hot));
+}
+
+/* ---------- things that change every tick ---------- */
+function updateDynamic() {
+  const e = elapsed(), t = th();
+  mapEls.user.setAttribute('transform', 'translate(' + S.user.x + ',' + S.user.y + ')');
+  const active = S.phase === 'active';
+  mapEls.dot.setAttribute('fill', active ? '#E0364F' : S.phase === 'resolved' ? '#0E9F6E' : '#6D4AE0');
+  mapEls.pulse.setAttribute('opacity', active ? 0.6 : 0);
+  const done = Math.max(1, Math.round(S.walkT * 60));
+  const pts = []; for (let i = 0; i <= done; i++) { const p = pointAt(S.walkT * i / done); pts.push(p.x.toFixed(1) + ',' + p.y.toFixed(1)); }
+  mapEls.trail.setAttribute('points', S.walkT > 0 ? pts.join(' ') : '');
+  if (S.responder) { mapEls.resp.setAttribute('visibility', 'visible'); mapEls.resp.setAttribute('transform', 'translate(' + S.responder.x + ',' + S.responder.y + ')'); mapEls.respLabel.textContent = S.responder.name; }
+  else mapEls.resp.setAttribute('visibility', 'hidden');
+
+  const bar = $('engBar'), ban = $('engBanner');
+  if (active) {
+    const next = S.level === 1 ? t.l2 : S.level === 2 ? t.l3 : null;
+    if (S.workflow === 'baseline') { bar.style.width = '0%'; ban.className = 'banner alert'; ban.textContent = 'Baseline: the alert was sent. Nobody is tracking whether it was received. Elapsed ' + fmt(e); }
+    else {
+    bar.style.width = (S.acked ? 100 : Math.min(100, e / t.l3 * 100)) + '%';
+    bar.style.background = S.acked ? 'var(--green)' : S.level >= 3 ? 'var(--coral)' : 'var(--purple)';
+    if (S.acked) { ban.className = 'banner ok'; ban.textContent = 'Acknowledged by ' + S.ackBy + '. Escalation paused. Help is on the way.'; }
+    else if (next) { ban.className = 'banner alert'; ban.textContent = 'No acknowledgement yet. Level ' + (S.level + 1) + ' in ' + fmt(next - e) + '  ·  elapsed ' + fmt(e); }
+    else { ban.className = 'banner alert'; ban.textContent = 'Maximum escalation reached. Call 112 now.'; }
+    const pc = $('phCount'); if (pc && next) pc.textContent = fmt(next - e);
+    }
+  } else {
+    bar.style.width = S.phase === 'resolved' ? '100%' : '0%'; bar.style.background = 'var(--green)';
+    ban.className = 'banner ' + (S.phase === 'resolved' ? 'ok' : 'idle');
+    ban.textContent = S.phase === 'resolved' ? 'Resolved. Student is safe. Incident logged.' : 'No active session. Hold the SOS button, or run the full demo.';
+  }
+  $('btnTrigger').disabled = S.phase !== 'idle';
+  $('workflow').disabled = S.phase === 'active';
+}
+
+function refresh() { renderPhone(); renderEngine(); renderGuardian(); renderSecurity(); renderLog(); renderHist(); drawHotspots(); updateDynamic(); }
+
+/* =========================================================
+   6. WIRE UP THE TOP BUTTONS
+   ========================================================= */
+$('btnWalk').onclick = startWalk;
+$('btnTrigger').onclick = () => trigger();
+$('btnDemo').onclick = runDemo;
+$('btnReset').onclick = () => { resetAll(); $('btnWalk').textContent = 'Start walk'; };
+$('mode').onchange = (e) => { S.mode = e.target.value; refresh(); };
+$('workflow').onchange = (e) => { if (S.phase !== 'idle') resetAll(); S.workflow = e.target.value; refresh(); toast(S.workflow === 'baseline' ? 'Baseline: SOS-only, no acknowledgment tracking or escalation' : 'ResQHer workflow'); };
+$('btnCsv').onclick = downloadCsv;
+$('hot').onchange = drawHotspots;
+
+buildMap();
+refresh();
+</script>
+</body>
+</html>
